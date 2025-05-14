@@ -18,7 +18,6 @@ function App() {
     <div className="app-container">
       <header className="app-header">
         <div className="header-top">
-          <div></div> {/* Left empty for balance */}
           <div className="theme-icon" onClick={toggleTheme} title="Toggle theme">
             {theme === 'light' ? '🌙' : '☀️'}
           </div>
@@ -32,7 +31,9 @@ function App() {
           />
           WanderEats
         </h1>
-        <p className="app-subtitle">Discover food carts wherever you wander.</p>
+        <p className="app-subtitle">
+          Discover food carts wherever you wander.
+        </p>
       </header>
 
       <CartMap />
