@@ -1,60 +1,124 @@
-/* Container */
-#root {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-}
-
-/* Typography */
-body {
+/* ===== Reset & Base Layout ===== */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
   font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f8f9fa;
   color: #1f1f1f;
-  background: #f8f9fa;
-  line-height: 1.6;
 }
 
-/* Header */
-h1 {
-  font-size: 2.2rem;
-  margin-bottom: 1.5rem;
-  color: #222;
+/* Root: allow scroll if needed */
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* App container: centered horizontally, stacked layout */
+.app-container {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== WanderEats Branding ===== */
+
+.app-header {
+  width: 100%;
   text-align: center;
+  margin-bottom: 1.5rem;
 }
 
-/* Dropdown */
-select {
-  padding: 0.45rem 0.75rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background-color: #fff;
+.app-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 2.2rem;
+  color: #1a1a1a;
+  margin: 0;
+  flex-wrap: wrap;
 }
 
-/* Modal */
+.app-logo {
+  width: 36px;
+  height: 36px;
+}
+
+.app-subtitle {
+  font-size: 1.05rem;
+  color: #555;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+}
+
+/* Map: make it fill available width */
+.leaflet-container {
+  width: 100% !important;
+  height: 600px !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (max-width: 600px) {
+  .app-title {
+    font-size: 1.6rem;
+  }
+
+  .app-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .app-logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .leaflet-container {
+    height: 400px !important;
+  }
+}
+
+/* ===== Modal Overlay ===== */
 .modal-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
+/* ===== Modal Content ===== */
 .modal {
   background: #fff;
   padding: 2rem;
   border-radius: 12px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  text-align: left;
+  animation: fadeIn 0.25s ease-out;
 }
 
 .modal h2 {
   margin-top: 0;
   margin-bottom: 1rem;
   font-size: 1.4rem;
-  font-weight: 500;
 }
 
 .modal label {
@@ -73,11 +137,6 @@ select {
   margin-top: 0.25rem;
 }
 
-.modal textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -85,28 +144,14 @@ select {
   margin-top: 1rem;
 }
 
-/* Map Popup Buttons */
-.leaflet-popup-content button {
-  margin-top: 0.5rem;
-  margin-right: 0.5rem;
-}
-
-/* Simple Card (if reused) */
-.card {
-  padding: 1rem;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  margin: 1rem 0;
-}
-
-/* Responsive tweaks */
-@media (max-width: 600px) {
-  h1 {
-    font-size: 1.8rem;
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
-
-  .modal {
-    padding: 1.5rem;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
