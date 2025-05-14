@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   MapContainer,
   TileLayer,
@@ -10,10 +10,11 @@ import {
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
+import haversine from 'haversine-distance';
 
 import CartForm from './CartForm';
 
-// 🌍 Cities and their coordinates
+// 🌍 City coordinates
 const cities = {
   "New York": [40.7128, -74.006],
   "Los Angeles": [34.0522, -118.2437],
@@ -25,7 +26,7 @@ const cities = {
   "Houston": [29.7604, -95.3698],
 };
 
-// 🎯 Custom food cart SVG icon
+// 📌 Custom food cart icon
 const foodCartIcon = new L.Icon({
   iconUrl: '/food-cart.svg',
   iconSize: [40, 40],
@@ -42,11 +43,10 @@ const LocationMarker = ({ onMapClick }) => {
   return null;
 };
 
-// 🎛️ Component to update map view when city changes
 const ChangeMapView = ({ coords }) => {
   const map = useMap();
   useEffect(() => {
-    map.setView(coords, 12); // city-level zoom
+    map.setView(coords, 12);
   }, [coords, map]);
   return null;
 };
@@ -57,8 +57,19 @@ const CartMap = () => {
   const [editingCart, setEditingCart] = useState(null);
   const [pendingLatLng, setPendingLatLng] = useState(null);
   const [selectedCity, setSelectedCity] = useState("New York");
+  const [mapCenter, setMapCenter] = useState(cities["New York"]);
 
-  const mapCenter = cities[selectedCity];
+  useEffect(() => {
+    const saved = localStorage.getItem('selectedCity');
+    if (saved && cities[saved]) {
+      setSelectedCity(saved);
+      setMapCenter(cities[saved]);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('selectedCity', selectedCity);
+  }, [selectedCity]);
 
   const fetchCarts = async () => {
     try {
@@ -115,9 +126,18 @@ const CartMap = () => {
     fetchCarts();
   }, []);
 
+  const filteredCarts = carts.filter((cart) => {
+    const cityCoords = cities[selectedCity];
+    const distance = haversine(
+      { lat: cityCoords[0], lon: cityCoords[1] },
+      { lat: cart.lat, lon: cart.lng }
+    );
+    return distance < 50000; // 50km radius
+  });
+
   return (
     <>
-      {/* 🌐 City selector */}
+      {/* City Selector */}
       <div style={{ marginBottom: '1rem', textAlign: 'left' }}>
         <label htmlFor="city-select" style={{ marginRight: '0.5rem' }}>
           🌍 Select a city:
@@ -125,9 +145,13 @@ const CartMap = () => {
         <select
           id="city-select"
           value={selectedCity}
-          onChange={(e) => setSelectedCity(e.target.value)}
+          onChange={(e) => {
+            const city = e.target.value;
+            setSelectedCity(city);
+            setMapCenter(cities[city]);
+          }}
         >
-          {Object.entries(cities).map(([name]) => (
+          {Object.keys(cities).map((name) => (
             <option key={name} value={name}>
               {name}
             </option>
@@ -135,19 +159,29 @@ const CartMap = () => {
         </select>
       </div>
 
-      {/* 🗺️ Map */}
+      {/* Map Controls */}
+      <div style={{ margin: '1rem 0', display: 'flex', gap: '1rem' }}>
+        <button onClick={() => setMapCenter(cities[selectedCity])}>🔄 Reset Map</button>
+        <button onClick={() => {
+          navigator.geolocation.getCurrentPosition((pos) => {
+            const { latitude, longitude } = pos.coords;
+            setMapCenter([latitude, longitude]);
+          });
+        }}>📍 Use My Location</button>
+      </div>
+
+      {/* Map */}
       <MapContainer
         center={mapCenter}
-        zoom={12} // default city-level zoom
+        zoom={12}
         minZoom={3}
         maxZoom={20}
         style={{ height: '600px', width: '100%' }}
       >
         <ChangeMapView coords={mapCenter} />
-
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        {carts.map((cart) => (
+        {filteredCarts.map((cart) => (
           <Marker
             key={cart._id}
             position={[cart.lat, cart.lng]}
@@ -168,7 +202,6 @@ const CartMap = () => {
         <LocationMarker onMapClick={handleMapClick} />
       </MapContainer>
 
-      {/* 📝 Modal Form */}
       <CartForm
         isOpen={formOpen}
         onClose={() => {
