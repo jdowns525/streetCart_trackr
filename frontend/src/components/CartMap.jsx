@@ -10,51 +10,31 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
 
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import CartForm from './CartForm'; // Modal form
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
+// Define custom SVG icon for food carts
+const foodCartIcon = new L.Icon({
+  iconUrl: '/food-cart.svg', // Make sure this file is in public/ folder
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+  popupAnchor: [0, -35]
 });
 
-const LocationMarker = ({ refreshMarkers }) => {
-  const [position, setPosition] = useState(null);
-
+const LocationMarker = ({ onMapClick }) => {
   useMapEvents({
-    click: async (e) => {
-      const { lat, lng } = e.latlng;
-
-      const name = prompt('Restaurant name?');
-      const notes = prompt('What did you like about it?');
-
-      if (!name && !notes) return;
-
-      setPosition([lat, lng]);
-
-      try {
-        await axios.post('/api/carts', { lat, lng, name, notes });
-        refreshMarkers();
-      } catch (err) {
-        alert('Failed to save pin');
-      }
+    click: (e) => {
+      onMapClick(e.latlng);
     },
   });
 
-  return position ? (
-    <Marker position={position}>
-      <Popup>
-        📍 Temporary Pin<br />
-        You just added this!
-      </Popup>
-    </Marker>
-  ) : null;
+  return null;
 };
 
 const CartMap = () => {
   const [carts, setCarts] = useState([]);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingCart, setEditingCart] = useState(null);
+  const [pendingLatLng, setPendingLatLng] = useState(null);
 
   const fetchCarts = async () => {
     try {
@@ -75,19 +55,35 @@ const CartMap = () => {
     }
   };
 
-  const handleEdit = async (cart) => {
-    const newName = prompt('Edit name:', cart.name);
-    const newNotes = prompt('Edit notes:', cart.notes);
-    if (newName === null && newNotes === null) return;
+  const handleEdit = (cart) => {
+    setEditingCart(cart);
+    setFormOpen(true);
+  };
 
+  const handleMapClick = (latlng) => {
+    setPendingLatLng(latlng);
+    setEditingCart(null);
+    setFormOpen(true);
+  };
+
+  const handleFormSubmit = async ({ name, notes }) => {
     try {
-      await axios.put(`/api/carts/${cart._id}`, {
-        name: newName ?? cart.name,
-        notes: newNotes ?? cart.notes,
-      });
+      if (editingCart) {
+        await axios.put(`/api/carts/${editingCart._id}`, {
+          name,
+          notes,
+        });
+      } else if (pendingLatLng) {
+        const { lat, lng } = pendingLatLng;
+        await axios.post('/api/carts', { name, notes, lat, lng });
+      }
+
       fetchCarts();
+      setFormOpen(false);
+      setEditingCart(null);
+      setPendingLatLng(null);
     } catch (err) {
-      alert('Failed to update pin');
+      alert('Failed to save pin');
     }
   };
 
@@ -96,25 +92,42 @@ const CartMap = () => {
   }, []);
 
   return (
-    <MapContainer center={[40.7128, -74.006]} zoom={13} style={{ height: '600px', width: '100%' }}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+    <>
+      <MapContainer center={[40.7128, -74.006]} zoom={13} style={{ height: '600px', width: '100%' }}>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-      {carts.map((cart) => (
-        <Marker key={cart._id} position={[cart.lat, cart.lng]}>
-          <Popup>
-            <strong>{cart.name || 'Unnamed Cart'}</strong><br />
-            <em>{cart.notes}</em><br />
-            Lat: {cart.lat.toFixed(4)}, Lng: {cart.lng.toFixed(4)}
-            <div style={{ marginTop: '0.5rem' }}>
-              <button onClick={() => handleEdit(cart)}>✏️ Edit</button>{' '}
-              <button onClick={() => handleDelete(cart._id)}>🗑️ Delete</button>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+        {carts.map((cart) => (
+          <Marker
+            key={cart._id}
+            position={[cart.lat, cart.lng]}
+            icon={foodCartIcon}
+          >
+            <Popup>
+              <strong>{cart.name || 'Unnamed Cart'}</strong><br />
+              <em>{cart.notes}</em><br />
+              Lat: {cart.lat.toFixed(4)}, Lng: {cart.lng.toFixed(4)}
+              <div style={{ marginTop: '0.5rem' }}>
+                <button onClick={() => handleEdit(cart)}>✏️ Edit</button>{' '}
+                <button onClick={() => handleDelete(cart._id)}>🗑️ Delete</button>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
 
-      <LocationMarker refreshMarkers={fetchCarts} />
-    </MapContainer>
+        <LocationMarker onMapClick={handleMapClick} />
+      </MapContainer>
+
+      <CartForm
+        isOpen={formOpen}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingCart(null);
+          setPendingLatLng(null);
+        }}
+        onSubmit={handleFormSubmit}
+        initialData={editingCart}
+      />
+    </>
   );
 };
 
