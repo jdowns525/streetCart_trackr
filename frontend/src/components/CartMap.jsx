@@ -14,7 +14,7 @@ import haversine from 'haversine-distance';
 
 import CartForm from './CartForm';
 
-// 🌍 City coordinates
+// 🌍 Predefined cities
 const cities = {
   "New York": [40.7128, -74.006],
   "Los Angeles": [34.0522, -118.2437],
@@ -26,12 +26,12 @@ const cities = {
   "Houston": [29.7604, -95.3698],
 };
 
-// 📌 Custom food cart icon
+// 📍 Custom food cart icon
 const foodCartIcon = new L.Icon({
   iconUrl: '/food-cart.svg',
   iconSize: [40, 40],
   iconAnchor: [20, 40],
-  popupAnchor: [0, -35]
+  popupAnchor: [0, -35],
 });
 
 const LocationMarker = ({ onMapClick }) => {
@@ -58,18 +58,7 @@ const CartMap = () => {
   const [pendingLatLng, setPendingLatLng] = useState(null);
   const [selectedCity, setSelectedCity] = useState("New York");
   const [mapCenter, setMapCenter] = useState(cities["New York"]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('selectedCity');
-    if (saved && cities[saved]) {
-      setSelectedCity(saved);
-      setMapCenter(cities[saved]);
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('selectedCity', selectedCity);
-  }, [selectedCity]);
+  const [userCoords, setUserCoords] = useState(null);
 
   const fetchCarts = async () => {
     try {
@@ -104,15 +93,11 @@ const CartMap = () => {
   const handleFormSubmit = async ({ name, notes }) => {
     try {
       if (editingCart) {
-        await axios.put(`/api/carts/${editingCart._id}`, {
-          name,
-          notes,
-        });
+        await axios.put(`/api/carts/${editingCart._id}`, { name, notes });
       } else if (pendingLatLng) {
         const { lat, lng } = pendingLatLng;
         await axios.post('/api/carts', { name, notes, lat, lng });
       }
-
       fetchCarts();
       setFormOpen(false);
       setEditingCart(null);
@@ -126,21 +111,40 @@ const CartMap = () => {
     fetchCarts();
   }, []);
 
-  const filteredCarts = carts.filter((cart) => {
-    const cityCoords = cities[selectedCity];
-    const distance = haversine(
-      { lat: cityCoords[0], lon: cityCoords[1] },
-      { lat: cart.lat, lon: cart.lng }
-    );
-    return distance < 50000; // 50km radius
-  });
+  // ⏳ Load saved city from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('selectedCity');
+    if (saved && cities[saved]) {
+      setSelectedCity(saved);
+      setMapCenter(cities[saved]);
+    }
+  }, []);
+
+  // 💾 Save selected city (not "My Location")
+  useEffect(() => {
+    if (selectedCity !== "My Location") {
+      localStorage.setItem('selectedCity', selectedCity);
+    }
+  }, [selectedCity]);
+
+  // 🔍 Filter pins by city (unless My Location)
+  const filteredCarts = selectedCity === "My Location"
+    ? carts
+    : carts.filter((cart) => {
+        const cityCoords = cities[selectedCity];
+        const distance = haversine(
+          { lat: cityCoords[0], lon: cityCoords[1] },
+          { lat: cart.lat, lon: cart.lng }
+        );
+        return distance < 50000;
+      });
 
   return (
     <>
-      {/* City Selector */}
+      {/* 🌍 City Selector */}
       <div style={{ marginBottom: '1rem', textAlign: 'left' }}>
         <label htmlFor="city-select" style={{ marginRight: '0.5rem' }}>
-          🌍 Select a city:
+          🌎 Select a city:
         </label>
         <select
           id="city-select"
@@ -148,10 +152,14 @@ const CartMap = () => {
           onChange={(e) => {
             const city = e.target.value;
             setSelectedCity(city);
-            setMapCenter(cities[city]);
+            if (city === "My Location" && userCoords) {
+              setMapCenter(userCoords);
+            } else if (cities[city]) {
+              setMapCenter(cities[city]);
+            }
           }}
         >
-          {Object.keys(cities).map((name) => (
+          {[...Object.keys(cities), "My Location"].map((name) => (
             <option key={name} value={name}>
               {name}
             </option>
@@ -159,18 +167,22 @@ const CartMap = () => {
         </select>
       </div>
 
-      {/* Map Controls */}
-      <div style={{ margin: '1rem 0', display: 'flex', gap: '1rem' }}>
-        <button onClick={() => setMapCenter(cities[selectedCity])}>🔄 Reset Map</button>
+      {/* 📍 Use My Location Button Only */}
+      <div style={{ margin: '1rem 0' }}>
         <button onClick={() => {
           navigator.geolocation.getCurrentPosition((pos) => {
             const { latitude, longitude } = pos.coords;
-            setMapCenter([latitude, longitude]);
+            const coords = [latitude, longitude];
+            setUserCoords(coords);
+            setMapCenter(coords);
+            setSelectedCity("My Location");
           });
-        }}>📍 Use My Location</button>
+        }}>
+          📍 Use My Location
+        </button>
       </div>
 
-      {/* Map */}
+      {/* 🗺️ Map */}
       <MapContainer
         center={mapCenter}
         zoom={12}
@@ -202,6 +214,7 @@ const CartMap = () => {
         <LocationMarker onMapClick={handleMapClick} />
       </MapContainer>
 
+      {/* 📝 Modal Form */}
       <CartForm
         isOpen={formOpen}
         onClose={() => {
