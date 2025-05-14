@@ -4,49 +4,69 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
 
-// ✅ Import icons correctly for Vite (ES Modules)
+// Leaflet marker icons (for Vite + React)
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// ✅ Set leaflet icon paths
+// Set correct icon paths
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
 
+// Component to handle clicks and add a new marker
 const LocationMarker = ({ refreshMarkers }) => {
   const [position, setPosition] = useState(null);
 
   useMapEvents({
     click: async (e) => {
       const { lat, lng } = e.latlng;
+
+      const name = prompt('Restaurant name?');
+      const notes = prompt('What did you like about it?');
+
+      // Skip if user cancels
+      if (!name && !notes) return;
+
       setPosition([lat, lng]);
 
-      // Optional: send to backend if ready
-      await axios.post('/api/carts', { lat, lng });
-
-      refreshMarkers();
+      try {
+        await axios.post('/api/carts', {
+          lat,
+          lng,
+          name,
+          notes,
+        });
+        refreshMarkers();
+      } catch (err) {
+        console.error('Error saving marker:', err);
+        alert('Failed to save marker.');
+      }
     },
   });
 
   return position ? (
     <Marker position={position}>
       <Popup>
-        Temporary Cart Location
+        Temporary Pin<br />
+        You just added this!
       </Popup>
     </Marker>
   ) : null;
 };
 
-
 const CartMap = () => {
   const [carts, setCarts] = useState([]);
 
   const fetchCarts = async () => {
-    const res = await axios.get('/api/carts');
-    setCarts(res.data);
+    try {
+      const res = await axios.get('/api/carts');
+      setCarts(res.data);
+    } catch (err) {
+      console.error('Error fetching carts:', err);
+    }
   };
 
   useEffect(() => {
@@ -56,14 +76,19 @@ const CartMap = () => {
   return (
     <MapContainer center={[40.7128, -74.0060]} zoom={13} style={{ height: '600px', width: '100%' }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      
+      {/* Render markers from backend */}
       {carts.map((cart) => (
         <Marker key={cart._id} position={[cart.lat, cart.lng]}>
           <Popup>
-            Cart ID: {cart._id}<br />
-            Latitude: {cart.lat.toFixed(4)}, Longitude: {cart.lng.toFixed(4)}
+            <strong>{cart.name || 'Unnamed Cart'}</strong><br />
+            {cart.notes && <em>{cart.notes}</em>}<br />
+            Lat: {cart.lat.toFixed(4)}, Lng: {cart.lng.toFixed(4)}
           </Popup>
         </Marker>
       ))}
+
+      {/* Add new marker on click */}
       <LocationMarker refreshMarkers={fetchCarts} />
     </MapContainer>
   );
