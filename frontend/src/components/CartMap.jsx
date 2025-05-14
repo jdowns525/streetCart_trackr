@@ -1,22 +1,25 @@
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents
+} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
 
-// Leaflet marker icons (for Vite + React)
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// Set correct icon paths
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
 
-// Component to handle clicks and add a new marker
 const LocationMarker = ({ refreshMarkers }) => {
   const [position, setPosition] = useState(null);
 
@@ -27,22 +30,15 @@ const LocationMarker = ({ refreshMarkers }) => {
       const name = prompt('Restaurant name?');
       const notes = prompt('What did you like about it?');
 
-      // Skip if user cancels
       if (!name && !notes) return;
 
       setPosition([lat, lng]);
 
       try {
-        await axios.post('/api/carts', {
-          lat,
-          lng,
-          name,
-          notes,
-        });
+        await axios.post('/api/carts', { lat, lng, name, notes });
         refreshMarkers();
       } catch (err) {
-        console.error('Error saving marker:', err);
-        alert('Failed to save marker.');
+        alert('Failed to save pin');
       }
     },
   });
@@ -50,7 +46,7 @@ const LocationMarker = ({ refreshMarkers }) => {
   return position ? (
     <Marker position={position}>
       <Popup>
-        Temporary Pin<br />
+        📍 Temporary Pin<br />
         You just added this!
       </Popup>
     </Marker>
@@ -69,26 +65,54 @@ const CartMap = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!confirm('Are you sure you want to delete this pin?')) return;
+    try {
+      await axios.delete(`/api/carts/${id}`);
+      fetchCarts();
+    } catch (err) {
+      alert('Failed to delete pin');
+    }
+  };
+
+  const handleEdit = async (cart) => {
+    const newName = prompt('Edit name:', cart.name);
+    const newNotes = prompt('Edit notes:', cart.notes);
+    if (newName === null && newNotes === null) return;
+
+    try {
+      await axios.put(`/api/carts/${cart._id}`, {
+        name: newName ?? cart.name,
+        notes: newNotes ?? cart.notes,
+      });
+      fetchCarts();
+    } catch (err) {
+      alert('Failed to update pin');
+    }
+  };
+
   useEffect(() => {
     fetchCarts();
   }, []);
 
   return (
-    <MapContainer center={[40.7128, -74.0060]} zoom={13} style={{ height: '600px', width: '100%' }}>
+    <MapContainer center={[40.7128, -74.006]} zoom={13} style={{ height: '600px', width: '100%' }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      
-      {/* Render markers from backend */}
+
       {carts.map((cart) => (
         <Marker key={cart._id} position={[cart.lat, cart.lng]}>
           <Popup>
             <strong>{cart.name || 'Unnamed Cart'}</strong><br />
-            {cart.notes && <em>{cart.notes}</em>}<br />
+            <em>{cart.notes}</em><br />
             Lat: {cart.lat.toFixed(4)}, Lng: {cart.lng.toFixed(4)}
+            <div style={{ marginTop: '0.5rem' }}>
+              <button onClick={() => handleEdit(cart)}>✏️ Edit</button>{' '}
+              <button onClick={() => handleDelete(cart._id)}>🗑️ Delete</button>
+            </div>
           </Popup>
         </Marker>
       ))}
 
-      {/* Add new marker on click */}
       <LocationMarker refreshMarkers={fetchCarts} />
     </MapContainer>
   );
