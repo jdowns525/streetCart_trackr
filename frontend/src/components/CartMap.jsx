@@ -4,22 +4,42 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
 
-delete L.Icon.Default.prototype._getIconUrl;
+// ✅ Import icons correctly for Vite (ES Modules)
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// ✅ Set leaflet icon paths
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
 });
 
 const LocationMarker = ({ refreshMarkers }) => {
+  const [position, setPosition] = useState(null);
+
   useMapEvents({
     click: async (e) => {
-      await axios.post('/api/carts', { lat: e.latlng.lat, lng: e.latlng.lng });
+      const { lat, lng } = e.latlng;
+      setPosition([lat, lng]);
+
+      // Optional: send to backend if ready
+      await axios.post('/api/carts', { lat, lng });
+
       refreshMarkers();
     },
   });
-  return null;
+
+  return position ? (
+    <Marker position={position}>
+      <Popup>
+        Temporary Cart Location
+      </Popup>
+    </Marker>
+  ) : null;
 };
+
 
 const CartMap = () => {
   const [carts, setCarts] = useState([]);
