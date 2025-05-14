@@ -6,6 +6,7 @@ html, body {
   font-family: 'Inter', system-ui, sans-serif;
   background-color: #f8f9fa;
   color: #1f1f1f;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Root: allow scroll if needed */
@@ -28,11 +29,28 @@ html, body {
 }
 
 /* ===== WanderEats Branding ===== */
-
 .app-header {
   width: 100%;
   text-align: center;
   margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.header-top {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+}
+
+.theme-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+
+.theme-icon:hover {
+  transform: rotate(15deg) scale(1.1);
 }
 
 .app-title {
@@ -59,33 +77,13 @@ html, body {
   padding: 0 1rem;
 }
 
-/* Map: make it fill available width */
+/* ===== Map Container ===== */
 .leaflet-container {
   width: 100% !important;
   height: 600px !important;
   border-radius: 8px;
   overflow: hidden;
-}
-
-/* ===== Responsive Adjustments ===== */
-@media (max-width: 600px) {
-  .app-title {
-    font-size: 1.6rem;
-  }
-
-  .app-subtitle {
-    font-size: 0.95rem;
-    line-height: 1.4;
-  }
-
-  .app-logo {
-    width: 28px;
-    height: 28px;
-  }
-
-  .leaflet-container {
-    height: 400px !important;
-  }
+  transition: filter 0.3s ease;
 }
 
 /* ===== Modal Overlay ===== */
@@ -154,4 +152,68 @@ html, body {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (max-width: 600px) {
+  .app-title {
+    font-size: 1.6rem;
+  }
+
+  .app-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .app-logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .leaflet-container {
+    height: 400px !important;
+  }
+
+  .header-top {
+    right: 0.75rem;
+    top: 0.75rem;
+  }
+
+  .theme-icon {
+    font-size: 1.3rem;
+  }
+}
+
+/* ===== Dark Mode Support ===== */
+body.dark {
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+body.dark .app-title,
+body.dark .app-subtitle {
+  color: #f0f0f0;
+}
+
+body.dark select,
+body.dark button {
+  background-color: #2b2b2b;
+  color: #f0f0f0;
+  border-color: #555;
+}
+
+body.dark .modal {
+  background-color: #1f1f1f;
+  color: #f0f0f0;
+}
+
+body.dark .modal input,
+body.dark .modal textarea {
+  background-color: #2b2b2b;
+  color: #f0f0f0;
+  border: 1px solid #444;
+}
+
+body.dark .leaflet-container {
+  filter: invert(90%) hue-rotate(180deg);
 }
