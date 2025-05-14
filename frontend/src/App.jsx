@@ -25,7 +25,7 @@ function App() {
 
         <h1 className="app-title">
           <img
-            src="/food-location.svg"
+            src="/food-cart.svg"
             alt="WanderEats logo"
             className="app-logo"
           />

@@ -28,7 +28,7 @@ const cities = {
 
 // 📍 Custom food cart icon
 const foodCartIcon = new L.Icon({
-  iconUrl: '/food-cart.svg',
+  iconUrl: '/food-location.svg',
   iconSize: [40, 40],
   iconAnchor: [20, 40],
   popupAnchor: [0, -35],
