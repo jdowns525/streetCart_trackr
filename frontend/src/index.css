@@ -1,6 +1,9 @@
 :root {
   --bg: #f8f9fa;
   --text: #1f1f1f;
+  --accent: #0077ff;
+  --accent-hover: #005fcc;
+  --accent-focus: #a3d0ff;
   font-family: 'Inter', system-ui, sans-serif;
   font-weight: 400;
   line-height: 1.6;
@@ -13,11 +16,12 @@
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-height: 100vh;
   background-color: var(--bg);
   color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 h1 {
@@ -28,7 +32,7 @@ h1 {
 }
 
 a {
-  color: #0077ff;
+  color: var(--accent);
   text-decoration: none;
 }
 a:hover {
@@ -38,23 +42,87 @@ a:hover {
 button {
   font-family: inherit;
   font-size: 0.95rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.2rem;
   border: none;
   border-radius: 6px;
-  background-color: #0077ff;
+  background-color: var(--accent);
   color: #fff;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 button:hover {
-  background-color: #005fcc;
+  background-color: var(--accent-hover);
 }
 button:focus {
-  outline: 2px solid #a3d0ff;
+  outline: 2px solid var(--accent-focus);
   outline-offset: 2px;
 }
 
-/* Dark mode */
+input[type="text"],
+select {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: var(--text);
+  transition: border-color 0.2s ease;
+}
+input[type="text"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Control Groups */
+.controls {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.control-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* List Display */
+.cart-list {
+  width: 100%;
+  max-width: 960px;
+  background-color: var(--bg);
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+  color: var(--text);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  overflow-y: auto;
+  max-height: 320px;
+}
+.cart-list h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+.cart-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cart-list li {
+  padding: 0.3rem 0;
+  font-size: 1rem;
+  border-bottom: 1px dashed #ccc;
+}
+
+/* Dark Mode */
 body.dark {
   --bg: #121212;
   --text: #f0f0f0;
@@ -68,8 +136,21 @@ body.dark a {
 
 body.dark button {
   background-color: #1e88e5;
-  color: #f0f0f0;
+  color: var(--text);
 }
-button:hover {
+body.dark button:hover {
   background-color: #1565c0;
+}
+
+body.dark input[type="text"],
+body.dark select {
+  background-color: #2b2b2b;
+  color: var(--text);
+  border: 1px solid #444;
+}
+
+body.dark .cart-list {
+  background-color: #1f1f1f;
+  border-color: #444;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
