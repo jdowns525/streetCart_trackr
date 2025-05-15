@@ -3,27 +3,43 @@
 An interactive full-stack app for tracking street food carts in real time. Built with React + Vite, LeafletJS, Express, and MongoDB, it supports pinning locations on a map with custom notes, editing them, and removing them — all backed by a robust, secure backend API.
 
 ────────────────────────────────────
-🚀 Features
+✨ Features
 
-- 🗺️ Interactive Map UI with LeafletJS
-- 📌 Add Pins by clicking the map
-- 📝 Add name & notes about the food cart
-- ✏️ Edit pins (name & notes)
-- 🗑️ Delete pins
-- 🔐 Secured API with Helmet, CORS, and rate limiting
-- ⚠️ Input validation using express-validator
-- 🧾 Request & error logging with Morgan + file logs
-- 📦 MongoDB Atlas for cloud-based storage
-- 🧪 Backend ready for 10× load testing
+- 🗺️ Interactive Map using Leaflet
+- 📍 Add, Edit, Delete Food Cart Pins
+- 📋 Toggle between Map & List View
+- 🏙️ City Picker + 📍 Geolocation Support
+- 🔍 Search for Locations by Name (Geocoding)
+- 📝 Add Notes to each cart
+- 🌗 Dark/Light Mode toggle
+- 🛡️ Secure Backend with Rate Limiting & Helmet
 
-────────────────────────────────────
-🧰 Tech Stack
+---
 
-Frontend      | Backend             | Infra/Security         
---------------|---------------------|-------------------------
-React (Vite)  | Node.js + Express   | Helmet (security headers)
-LeafletJS     | MongoDB (Mongoose)  | express-rate-limit     
-Axios         | express-validator   | Morgan (logging)       
+🧰 Technologies Used
+
+🖥️ Frontend
+- React – UI library
+- Vite – Fast bundler & dev server
+- Leaflet – Mapping library
+- React-Leaflet – React bindings for Leaflet
+- Axios – HTTP requests
+- Haversine-distance – Geolocation distance filtering
+
+🗄️ Backend
+- Express.js – Node.js server framework
+- MongoDB + Mongoose – NoSQL database & ORM
+- Helmet – HTTP header security
+- CORS – Cross-origin resource sharing
+- dotenv – Environment variable management
+- express-rate-limit – API rate limiting
+- express-validator – Input validation
+
+🛠️ Dev Tools
+- nodemon – Auto-reloads backend during development
+
+🌐 External APIs
+- OpenStreetMap Nominatim API – For location search (geocoding)    
 
 ────────────────────────────────────
 🔧 Setup Instructions
