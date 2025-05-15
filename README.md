@@ -1,51 +1,97 @@
 📍 StreetCart Trackr
 
-An interactive full-stack app for tracking street food carts in real time. Built with React + Vite, LeafletJS, Express, and MongoDB, it supports pinning locations on a map with custom notes, editing them, and removing them — all backed by a robust, secure backend API.
+An interactive full-stack app for tracking street food carts across cities — pin locations, add notes, search, and manage carts with a sleek UI and secure backend. Built with React, LeafletJS, Express, and MongoDB.
 
 ────────────────────────────────────
 ✨ Features
 
-- 🗺️ Interactive Map using Leaflet
-- 📍 Add, Edit, Delete Food Cart Pins
-- 📋 Toggle between Map & List View
-- 🏙️ City Picker + 📍 Geolocation Support
-- 🔍 Search for Locations by Name (Geocoding)
-- 📝 Add Notes to each cart
-- 🌗 Dark/Light Mode toggle
-- 🛡️ Secure Backend with Rate Limiting & Helmet
+- 🗺️ Interactive Map with Leaflet & React-Leaflet
+- 📍 Add, Edit, Delete Food Cart Pins with Notes
+- 📋 Toggle Between Map View and Cart List
+- 🏙️ City Selector + 📍 Geolocation Support
+- 🔍 Location Search via Geocoding
+- 🌗 Light & Dark Mode UI Toggle
+- 🛡️ Robust Backend with Input Validation, Rate Limiting, and Secure Headers
 
----
-
+────────────────────────────────────
 🧰 Technologies Used
 
 🖥️ Frontend
-- React – UI library
-- Vite – Fast bundler & dev server
-- Leaflet – Mapping library
-- React-Leaflet – React bindings for Leaflet
-- Axios – HTTP requests
-- Haversine-distance – Geolocation distance filtering
+- React – Component-based UI
+- Vite – Lightning-fast build tool
+- Leaflet & React-Leaflet – Interactive maps
+- Axios – RESTful HTTP requests
+- haversine-distance – Proximity filtering
 
 🗄️ Backend
-- Express.js – Node.js server framework
-- MongoDB + Mongoose – NoSQL database & ORM
-- Helmet – HTTP header security
+- Express.js – API server
+- MongoDB + Mongoose – NoSQL data layer
+- Helmet – Security middleware
+- express-rate-limit – DoS protection
+- express-validator – Schema validation
+- dotenv – Environment variable handling
 - CORS – Cross-origin resource sharing
-- dotenv – Environment variable management
-- express-rate-limit – API rate limiting
-- express-validator – Input validation
+
+🧪 Testing
+- Jest – Unit and integration testing
+- Supertest – HTTP endpoint testing
+- mongodb-memory-server – In-memory test database
 
 🛠️ Dev Tools
-- nodemon – Auto-reloads backend during development
+- nodemon – Live server reloading
+- Git Filter-Repo – Git history cleanup for large files
 
-🌐 External APIs
-- OpenStreetMap Nominatim API – For location search (geocoding)    
-
+────────────────────────────────────
 ✅ Production Readiness
 
-- ✅ Helmet for security headers
-- ✅ Rate limiting with IP proxy trust
-- ✅ Input validation for all API routes
-- ✅ Global error handling
-- ✅ File-based logging for production monitoring
-- ✅ Modular, clean code for scalability
+- ✅ Security Headers via Helmet
+- ✅ Rate Limiting with Proxy Trust (for Vercel, etc.)
+- ✅ Robust Input Validation with Error Handling
+- ✅ File Logging (access.log / error.log)
+- ✅ Testing Coverage for CRUD and edge cases
+- ✅ Refactored Git History to remove large binaries
+- ✅ Modular Codebase with clear separation of concerns
+
+────────────────────────────────────
+🚀 Getting Started
+
+### Prerequisites
+- Node.js v18+
+- MongoDB (Local or Atlas)
+
+### Install Dependencies
+# Backend
+cd backend
+npm install
+
+# Frontend
+cd ../frontend
+npm install
+
+### Run the App
+# Backend
+cd backend
+npm run dev
+
+# Frontend (in separate terminal)
+cd frontend
+npm run dev
+
+────────────────────────────────────
+🧪 Run Tests
+cd backend
+NODE_ENV=test npm test
+
+Tests cover creation, reading, updating, and deleting carts, including validation and edge cases.
+
+────────────────────────────────────
+📁 Environment Variables
+
+Create a .env file inside /backend:
+
+MONGO_URI=your_mongodb_connection_string
+
+────────────────────────────────────
+👨‍💻 Author
+
+Built with 🍕, ☕, and ❤️ by @jdowns525
