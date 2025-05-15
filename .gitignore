@@ -1,3 +1,5 @@
 # Prevent tracking node_modules and caches
 node_modules/
 .cache/
+node_modules/
+.cache/
