@@ -1,5 +1,7 @@
+const mongoose = require('mongoose');
 const Cart = require('../models/Cart');
 
+// GET all carts
 exports.getCarts = async (req, res, next) => {
   try {
     const carts = await Cart.find();
@@ -9,6 +11,7 @@ exports.getCarts = async (req, res, next) => {
   }
 };
 
+// POST create new cart
 exports.createCart = async (req, res, next) => {
   try {
     const { lat, lng, name, notes } = req.body;
@@ -19,22 +22,48 @@ exports.createCart = async (req, res, next) => {
   }
 };
 
+// PUT update existing cart
 exports.updateCart = async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: 'Invalid cart ID' });
+  }
+
   try {
-    const { id } = req.params;
-    const { name, notes } = req.body;
-    const updated = await Cart.findByIdAndUpdate(id, { name, notes }, { new: true });
+    const { name, notes, lat, lng } = req.body;
+    const updated = await Cart.findByIdAndUpdate(
+      id,
+      { name, notes, lat, lng },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Cart not found' });
+    }
+
     res.json(updated);
   } catch (err) {
     next(err);
   }
 };
 
+// DELETE a cart by ID
 exports.deleteCart = async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: 'Invalid cart ID' });
+  }
+
   try {
-    const { id } = req.params;
-    await Cart.findByIdAndDelete(id);
-    res.status(204).end();
+    const deleted = await Cart.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'Cart not found' });
+    }
+
+    res.status(204).send();
   } catch (err) {
     next(err);
   }
