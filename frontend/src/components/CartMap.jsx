@@ -5,7 +5,7 @@ import {
   Marker,
   Popup,
   useMap,
-  useMapEvents,
+  useMapEvents
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -57,6 +57,8 @@ const CartMap = () => {
   const [mapCenter, setMapCenter] = useState(cities["New York"]);
   const [userCoords, setUserCoords] = useState(null);
   const [showList, setShowList] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResult, setSearchResult] = useState(null);
 
   const fetchCarts = async () => {
     try {
@@ -86,6 +88,7 @@ const CartMap = () => {
     setPendingLatLng(latlng);
     setEditingCart(null);
     setFormOpen(true);
+    setSearchResult(null);
   };
 
   const handleFormSubmit = async ({ name, notes }) => {
@@ -102,6 +105,27 @@ const CartMap = () => {
       setPendingLatLng(null);
     } catch (err) {
       alert('Failed to save pin');
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery) return;
+    try {
+      const res = await axios.get('https://nominatim.openstreetmap.org/search', {
+        params: { q: searchQuery, format: 'json', limit: 1 }
+      });
+
+      if (res.data && res.data.length > 0) {
+        const { lat, lon } = res.data[0];
+        const coords = [parseFloat(lat), parseFloat(lon)];
+        setMapCenter(coords);
+        setSearchResult(coords);
+      } else {
+        alert('Location not found');
+      }
+    } catch (err) {
+      alert('Search failed');
+      console.error(err);
     }
   };
 
@@ -161,7 +185,18 @@ const CartMap = () => {
         </select>
       </div>
 
-      <div style={{ margin: '1rem 0' }}>
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+        <input
+          type="text"
+          placeholder="Search location..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: '1px solid #ccc' }}
+        />
+        <button onClick={handleSearch}>🔍 Search</button>
+      </div>
+
+      <div style={{ marginBottom: '1rem' }}>
         <button onClick={() => {
           navigator.geolocation.getCurrentPosition((pos) => {
             const { latitude, longitude } = pos.coords;
@@ -175,39 +210,18 @@ const CartMap = () => {
         </button>
       </div>
 
-      <div style={{ margin: '1rem 0' }}>
+      <div style={{ marginBottom: '1rem' }}>
         <button onClick={() => setShowList(!showList)}>
           {showList ? '🗺️ Show Map' : '📋 Show List of Pins'}
         </button>
       </div>
 
       {showList && (
-        <div
-          style={{
-            marginTop: '1rem',
-            padding: '1rem',
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            background: 'var(--bg)',
-            color: 'inherit',
-            maxHeight: '300px',
-            overflowY: 'auto',
-            width: '100%',
-            boxSizing: 'border-box'
-          }}
-        >
-          <h3 style={{ marginTop: 0, fontSize: '1.2rem' }}>
-            📍 Pinned Carts
-          </h3>
+        <div style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px', background: 'var(--bg)', color: 'inherit', maxHeight: '300px', overflowY: 'auto' }}>
+          <h3 style={{ marginTop: 0 }}>📍 Pinned Carts</h3>
           <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
             {filteredCarts.map((cart) => (
-              <li
-                key={cart._id}
-                style={{
-                  padding: '0.4rem 0',
-                  borderBottom: '1px solid rgba(0,0,0,0.07)'
-                }}
-              >
+              <li key={cart._id} style={{ marginBottom: '0.75rem' }}>
                 • {cart.name || 'Unnamed Cart'}
               </li>
             ))}
@@ -243,6 +257,17 @@ const CartMap = () => {
               </Popup>
             </Marker>
           ))}
+
+          {searchResult && (
+            <Marker position={searchResult} icon={foodCartIcon}>
+              <Popup>
+                <div>
+                  <strong>Search Result</strong><br />
+                  Click the map to pin it.
+                </div>
+              </Popup>
+            </Marker>
+          )}
 
           <LocationMarker onMapClick={handleMapClick} />
         </MapContainer>
