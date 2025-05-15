@@ -23,7 +23,10 @@ app.use(helmet());
 app.use(express.json());
 
 // ✅ Logging
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, 'access.log'),
+  { flags: 'a' }
+);
 app.use(morgan('combined', { stream: accessLogStream }));
 app.use(morgan('dev')); // Logs to terminal
 
@@ -49,8 +52,8 @@ app.use((err, req, res, next) => {
 // ✅ Export app for testing
 module.exports = app;
 
-// ✅ Only start server if not in test environment
-if (require.main === module) {
+// ✅ Connect to DB and start server unless in test mode
+if (require.main === module && process.env.NODE_ENV !== 'test') {
   mongoose.connect(process.env.MONGO_URI)
     .then(() => {
       app.listen(5000, () => console.log('✅ Backend running on port 5000'));
