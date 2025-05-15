@@ -1,6 +1,22 @@
 {
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon backend/index.js"
+  },
   "dependencies": {
+    "express-rate-limit": "^7.5.0",
+    "express-validator": "^7.2.1",
     "haversine-distance": "^1.2.3",
-    "mongodb": "^6.16.0"
+    "helmet": "^8.1.0",
+    "mongodb": "^6.16.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.14.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
