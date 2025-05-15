@@ -5,16 +5,14 @@ import {
   Marker,
   Popup,
   useMap,
-  useMapEvents
+  useMapEvents,
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
 import haversine from 'haversine-distance';
-
 import CartForm from './CartForm';
 
-// 🌍 Predefined cities
 const cities = {
   "New York": [40.7128, -74.006],
   "Los Angeles": [34.0522, -118.2437],
@@ -26,7 +24,6 @@ const cities = {
   "Houston": [29.7604, -95.3698],
 };
 
-// 📍 Custom food cart icon
 const foodCartIcon = new L.Icon({
   iconUrl: '/food-location.svg',
   iconSize: [40, 40],
@@ -59,6 +56,7 @@ const CartMap = () => {
   const [selectedCity, setSelectedCity] = useState("New York");
   const [mapCenter, setMapCenter] = useState(cities["New York"]);
   const [userCoords, setUserCoords] = useState(null);
+  const [showList, setShowList] = useState(false);
 
   const fetchCarts = async () => {
     try {
@@ -111,7 +109,6 @@ const CartMap = () => {
     fetchCarts();
   }, []);
 
-  // ⏳ Load saved city from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('selectedCity');
     if (saved && cities[saved]) {
@@ -120,14 +117,12 @@ const CartMap = () => {
     }
   }, []);
 
-  // 💾 Save selected city (not "My Location")
   useEffect(() => {
     if (selectedCity !== "My Location") {
       localStorage.setItem('selectedCity', selectedCity);
     }
   }, [selectedCity]);
 
-  // 🔍 Filter pins by city (unless My Location)
   const filteredCarts = selectedCity === "My Location"
     ? carts
     : carts.filter((cart) => {
@@ -141,7 +136,6 @@ const CartMap = () => {
 
   return (
     <>
-      {/* 🌍 City Selector */}
       <div style={{ marginBottom: '1rem', textAlign: 'left' }}>
         <label htmlFor="city-select" style={{ marginRight: '0.5rem' }}>
           🌎 Select a city:
@@ -167,7 +161,6 @@ const CartMap = () => {
         </select>
       </div>
 
-      {/* 📍 Use My Location Button Only */}
       <div style={{ margin: '1rem 0' }}>
         <button onClick={() => {
           navigator.geolocation.getCurrentPosition((pos) => {
@@ -182,39 +175,79 @@ const CartMap = () => {
         </button>
       </div>
 
-      {/* 🗺️ Map */}
-      <MapContainer
-        center={mapCenter}
-        zoom={12}
-        minZoom={3}
-        maxZoom={20}
-        style={{ height: '600px', width: '100%' }}
-      >
-        <ChangeMapView coords={mapCenter} />
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <div style={{ margin: '1rem 0' }}>
+        <button onClick={() => setShowList(!showList)}>
+          {showList ? '🗺️ Show Map' : '📋 Show List of Pins'}
+        </button>
+      </div>
 
-        {filteredCarts.map((cart) => (
-          <Marker
-            key={cart._id}
-            position={[cart.lat, cart.lng]}
-            icon={foodCartIcon}
-          >
-            <Popup>
-              <strong>{cart.name || 'Unnamed Cart'}</strong><br />
-              <em>{cart.notes}</em><br />
-              Lat: {cart.lat.toFixed(4)}, Lng: {cart.lng.toFixed(4)}
-              <div style={{ marginTop: '0.5rem' }}>
-                <button onClick={() => handleEdit(cart)}>✏️ Edit</button>{' '}
-                <button onClick={() => handleDelete(cart._id)}>🗑️ Delete</button>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+      {showList && (
+        <div
+          style={{
+            marginTop: '1rem',
+            padding: '1rem',
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            background: 'var(--bg)',
+            color: 'inherit',
+            maxHeight: '300px',
+            overflowY: 'auto',
+            width: '100%',
+            boxSizing: 'border-box'
+          }}
+        >
+          <h3 style={{ marginTop: 0, fontSize: '1.2rem' }}>
+            📍 Pinned Carts
+          </h3>
+          <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
+            {filteredCarts.map((cart) => (
+              <li
+                key={cart._id}
+                style={{
+                  padding: '0.4rem 0',
+                  borderBottom: '1px solid rgba(0,0,0,0.07)'
+                }}
+              >
+                • {cart.name || 'Unnamed Cart'}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-        <LocationMarker onMapClick={handleMapClick} />
-      </MapContainer>
+      {!showList && (
+        <MapContainer
+          center={mapCenter}
+          zoom={12}
+          minZoom={3}
+          maxZoom={20}
+          style={{ height: '600px', width: '100%' }}
+        >
+          <ChangeMapView coords={mapCenter} />
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-      {/* 📝 Modal Form */}
+          {filteredCarts.map((cart) => (
+            <Marker
+              key={cart._id}
+              position={[cart.lat, cart.lng]}
+              icon={foodCartIcon}
+            >
+              <Popup>
+                <strong>{cart.name || 'Unnamed Cart'}</strong><br />
+                <em>{cart.notes}</em><br />
+                Lat: {cart.lat.toFixed(4)}, Lng: {cart.lng.toFixed(4)}
+                <div style={{ marginTop: '0.5rem' }}>
+                  <button onClick={() => handleEdit(cart)}>✏️ Edit</button>{' '}
+                  <button onClick={() => handleDelete(cart._id)}>🗑️ Delete</button>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+
+          <LocationMarker onMapClick={handleMapClick} />
+        </MapContainer>
+      )}
+
       <CartForm
         isOpen={formOpen}
         onClose={() => {

@@ -1,10 +1,11 @@
 :root {
+  --bg: #f8f9fa;
+  --text: #1f1f1f;
   font-family: 'Inter', system-ui, sans-serif;
   font-weight: 400;
   line-height: 1.6;
-  background-color: #f8f9fa;
-  color: #1f1f1f;
-
+  background-color: var(--bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -16,6 +17,7 @@ body {
   place-items: center;
   min-height: 100vh;
   background-color: var(--bg);
+  color: var(--text);
 }
 
 h1 {
@@ -50,4 +52,24 @@ button:hover {
 button:focus {
   outline: 2px solid #a3d0ff;
   outline-offset: 2px;
+}
+
+/* Dark mode */
+body.dark {
+  --bg: #121212;
+  --text: #f0f0f0;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+body.dark a {
+  color: #8ab4f8;
+}
+
+body.dark button {
+  background-color: #1e88e5;
+  color: #f0f0f0;
+}
+button:hover {
+  background-color: #1565c0;
 }
