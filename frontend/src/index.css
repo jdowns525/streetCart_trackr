@@ -1,156 +1,44 @@
 :root {
-  --bg: #f8f9fa;
-  --text: #1f1f1f;
-  --accent: #0077ff;
-  --accent-hover: #005fcc;
-  --accent-focus: #a3d0ff;
-  font-family: 'Inter', system-ui, sans-serif;
-  font-weight: 400;
-  line-height: 1.6;
-  background-color: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  --bg: #0f0f0f;
+  --text: #e5e7eb;
+  --card: #1c1c1e;
+  --input: #2a2a2d;
+  --border: #3a3a3d;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --radius: 10px;
+  font-family: 'Inter', sans-serif;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  background-color: var(--bg);
+  background: var(--bg);
   color: var(--text);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin: 0;
+  padding: 1rem;
+  font-size: 16px;
 }
 
-h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #1a1a1a;
+button,
+input,
+select,
+textarea {
+  background: var(--input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
 }
 
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
-
-button {
-  font-family: inherit;
-  font-size: 0.95rem;
-  padding: 0.5rem 1.2rem;
-  border: none;
-  border-radius: 6px;
-  background-color: var(--accent);
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
 button:hover {
   background-color: var(--accent-hover);
 }
-button:focus {
-  outline: 2px solid var(--accent-focus);
-  outline-offset: 2px;
-}
 
-input[type="text"],
-select {
-  font-family: inherit;
-  font-size: 1rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  color: var(--text);
-  transition: border-color 0.2s ease;
-}
-input[type="text"]:focus,
-select:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-
-/* Control Groups */
-.controls {
-  width: 100%;
-  max-width: 960px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.control-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-/* List Display */
-.cart-list {
-  width: 100%;
-  max-width: 960px;
-  background-color: var(--bg);
-  border: 1px solid #ccc;
-  border-radius: 8px;
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   padding: 1rem;
-  color: var(--text);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  overflow-y: auto;
-  max-height: 320px;
-}
-.cart-list h3 {
-  margin-top: 0;
-  font-size: 1.2rem;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 0.5rem;
-}
-.cart-list ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.cart-list li {
-  padding: 0.3rem 0;
-  font-size: 1rem;
-  border-bottom: 1px dashed #ccc;
-}
-
-/* Dark Mode */
-body.dark {
-  --bg: #121212;
-  --text: #f0f0f0;
-  background-color: var(--bg);
-  color: var(--text);
-}
-
-body.dark a {
-  color: #8ab4f8;
-}
-
-body.dark button {
-  background-color: #1e88e5;
-  color: var(--text);
-}
-body.dark button:hover {
-  background-color: #1565c0;
-}
-
-body.dark input[type="text"],
-body.dark select {
-  background-color: #2b2b2b;
-  color: var(--text);
-  border: 1px solid #444;
-}
-
-body.dark .cart-list {
-  background-color: #1f1f1f;
-  border-color: #444;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  margin-bottom: 1rem;
 }
