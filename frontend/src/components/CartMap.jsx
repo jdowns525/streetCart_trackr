@@ -156,11 +156,19 @@ const CartMap = () => {
 
   return (
     <>
-      {/* Top Controls */}
-      <div style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <label htmlFor="city-select" style={{ marginRight: '0.5rem' }}>
-            Select a City:
+  {/* Top Controls */}
+      <div
+        style={{
+          marginBottom: '1rem',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          alignItems: 'center'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <label htmlFor="city-select" style={{ whiteSpace: 'nowrap' }}>
+            🌆 Select a City:
           </label>
           <select
             id="city-select"
@@ -176,7 +184,9 @@ const CartMap = () => {
             }}
           >
             {[...Object.keys(cities), "My Location"].map((name) => (
-              <option key={name} value={name}>{name}</option>
+              <option key={name} value={name}>
+                {name}
+              </option>
             ))}
           </select>
         </div>
@@ -190,15 +200,17 @@ const CartMap = () => {
             style={{ flex: 1 }}
           />
           <button onClick={handleSearch}>🔍</button>
-          <button onClick={() => {
-            navigator.geolocation.getCurrentPosition((pos) => {
-              const { latitude, longitude } = pos.coords;
-              const coords = [latitude, longitude];
-              setUserCoords(coords);
-              setMapCenter(coords);
-              setSelectedCity("My Location");
-            });
-          }}>
+          <button
+            onClick={() => {
+              navigator.geolocation.getCurrentPosition((pos) => {
+                const { latitude, longitude } = pos.coords;
+                const coords = [latitude, longitude];
+                setUserCoords(coords);
+                setMapCenter(coords);
+                setSelectedCity("My Location");
+              });
+            }}
+          >
             My Location
           </button>
         </div>
