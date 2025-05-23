@@ -138,25 +138,48 @@ const CartMap = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedCity !== "My Location") {
-      localStorage.setItem('selectedCity', selectedCity);
-    }
+  if (selectedCity === "My Location") {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const { latitude, longitude } = pos.coords;
+      const coords = [latitude, longitude];
+      setUserCoords(coords);
+      setMapCenter(coords);
+    });
+  } else if (cities[selectedCity]) {
+    setMapCenter(cities[selectedCity]);
+    localStorage.setItem('selectedCity', selectedCity);
+  }
   }, [selectedCity]);
 
-  const filteredCarts = selectedCity === "My Location"
-    ? carts
-    : carts.filter((cart) => {
-        const cityCoords = cities[selectedCity];
-        const distance = haversine(
-          { lat: cityCoords[0], lon: cityCoords[1] },
-          { lat: cart.lat, lon: cart.lng }
-        );
-        return distance < 50000;
-      });
+const filteredCarts = (() => {
+  if (selectedCity === "My Location" && userCoords) {
+    return carts.filter((cart) => {
+      const distance = haversine(
+        { lat: userCoords[0], lon: userCoords[1] },
+        { lat: cart.lat, lon: cart.lng }
+      );
+      return distance < 50000; // or any desired radius
+    });
+  }
+
+  if (cities[selectedCity]) {
+    return carts.filter((cart) => {
+      const cityCoords = cities[selectedCity];
+      const distance = haversine(
+        { lat: cityCoords[0], lon: cityCoords[1] },
+        { lat: cart.lat, lon: cart.lng }
+      );
+      return distance < 50000;
+    });
+  }
+
+  return [];
+})();
+
 
   return (
     <>
-  {/* Top Controls */}
+      {/* Top Controls */}
       <div
         style={{
           marginBottom: '1rem',
@@ -173,14 +196,16 @@ const CartMap = () => {
           <select
             id="city-select"
             value={selectedCity}
-            onChange={(e) => {
-              const city = e.target.value;
-              setSelectedCity(city);
-              if (city === "My Location" && userCoords) {
-                setMapCenter(userCoords);
-              } else if (cities[city]) {
-                setMapCenter(cities[city]);
-              }
+            onChange={(e) => setSelectedCity(e.target.value)}
+            style={{
+              height: '35px',
+              padding: '0.5rem 1rem',
+              fontSize: '1rem',
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--border)',
+              background: 'var(--input)',
+              color: 'var(--text)',
+              appearance: 'none',
             }}
           >
             {[...Object.keys(cities), "My Location"].map((name) => (
@@ -200,28 +225,23 @@ const CartMap = () => {
             style={{ flex: 1 }}
           />
           <button onClick={handleSearch}>🔍</button>
-          <button
-            onClick={() => {
-              navigator.geolocation.getCurrentPosition((pos) => {
-                const { latitude, longitude } = pos.coords;
-                const coords = [latitude, longitude];
-                setUserCoords(coords);
-                setMapCenter(coords);
-                setSelectedCity("My Location");
-              });
-            }}
-          >
-            My Location
-          </button>
         </div>
       </div>
 
-      {/* Side-by-side layout */}
+      {/* Map and List View */}
       <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-        {/* Map Card with Inner Card */}
+        {/* Map */}
         <div style={{ flex: 2 }}>
           <div className="card">
-            <div className="inner-card" style={{ padding: 0, height: '600px', borderRadius: '8px', overflow: 'hidden' }}>
+            <div
+              className="inner-card"
+              style={{
+                padding: 0,
+                height: '600px',
+                borderRadius: '8px',
+                overflow: 'hidden',
+              }}
+            >
               <MapContainer
                 center={mapCenter}
                 zoom={12}
@@ -261,7 +281,7 @@ const CartMap = () => {
           </div>
         </div>
 
-        {/* List Card */}
+        {/* List */}
         <div className="card list-wrapper">
           <h3>📍 Saved Carts</h3>
           <ul style={{ listStyle: 'none', padding: 0 }}>
