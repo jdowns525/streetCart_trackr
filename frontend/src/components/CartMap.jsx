@@ -206,58 +206,51 @@ const CartMap = () => {
 
       {/* Side-by-side layout */}
       <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-        {/* Map */}
+        {/* Map Card with Inner Card */}
         <div style={{ flex: 2 }}>
-          <div className="inner-card" style={{ padding: 0, height: '600px' }}>
-            <MapContainer
-              center={mapCenter}
-              zoom={12}
-              minZoom={3}
-              maxZoom={20}
-              style={{ height: '100%', width: '100%' }}
-            >
-              <ChangeMapView coords={mapCenter} />
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              {filteredCarts.map((cart) => (
-                <Marker
-                  key={cart._id}
-                  position={[cart.lat, cart.lng]}
-                  icon={foodCartIcon}
-                >
-                  <Popup>
-                    <strong>{cart.name || 'Unnamed Cart'}</strong><br />
-                    <em>{cart.notes}</em><br />
-                    <div style={{ marginTop: '0.5rem' }}>
-                      <button onClick={() => handleEdit(cart)}>✏️</button>{' '}
-                      <button onClick={() => handleDelete(cart._id)}>🗑️</button>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-              {searchResult && (
-                <Marker position={searchResult} icon={foodCartIcon}>
-                  <Popup>
-                    <strong>Search Result</strong><br />
-                    Click map to pin
-                  </Popup>
-                </Marker>
-              )}
-              <LocationMarker onMapClick={handleMapClick} />
-            </MapContainer>
+          <div className="card">
+            <div className="inner-card" style={{ padding: 0, height: '600px', borderRadius: '8px', overflow: 'hidden' }}>
+              <MapContainer
+                center={mapCenter}
+                zoom={12}
+                minZoom={3}
+                maxZoom={20}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <ChangeMapView coords={mapCenter} />
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                {filteredCarts.map((cart) => (
+                  <Marker
+                    key={cart._id}
+                    position={[cart.lat, cart.lng]}
+                    icon={foodCartIcon}
+                  >
+                    <Popup>
+                      <strong>{cart.name || 'Unnamed Cart'}</strong><br />
+                      <em>{cart.notes}</em><br />
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <button onClick={() => handleEdit(cart)}>✏️</button>{' '}
+                        <button onClick={() => handleDelete(cart._id)}>🗑️</button>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+                {searchResult && (
+                  <Marker position={searchResult} icon={foodCartIcon}>
+                    <Popup>
+                      <strong>Search Result</strong><br />
+                      Click map to pin
+                    </Popup>
+                  </Marker>
+                )}
+                <LocationMarker onMapClick={handleMapClick} />
+              </MapContainer>
+            </div>
           </div>
         </div>
 
-        {/* List */}
-        <div style={{
-          flex: 1,
-          background: 'var(--card)',
-          color: 'var(--text)',
-          padding: '1rem',
-          borderRadius: '8px',
-          maxHeight: '600px',
-          overflowY: 'auto',
-          boxShadow: 'var(--shadow)',
-        }}>
+        {/* List Card */}
+        <div className="card list-wrapper">
           <h3>📍 Saved Carts</h3>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {filteredCarts.map((cart) => (
