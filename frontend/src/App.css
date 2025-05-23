@@ -280,3 +280,25 @@ body.dark .list-wrapper {
   color: #f0f0f0;
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
 }
+
+/* Match select with buttons/inputs */
+select {
+  background: var(--input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+}
+
+/* Inner card (cart entry) */
+.inner-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+}
+body.dark .inner-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #444;
+}
