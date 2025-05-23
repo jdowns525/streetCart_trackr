@@ -160,7 +160,7 @@ const CartMap = () => {
       <div style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <label htmlFor="city-select" style={{ marginRight: '0.5rem' }}>
-            🌎 Select a city:
+            Select a City:
           </label>
           <select
             id="city-select"
@@ -199,7 +199,7 @@ const CartMap = () => {
               setSelectedCity("My Location");
             });
           }}>
-            📍 My Location
+            My Location
           </button>
         </div>
       </div>
@@ -208,34 +208,43 @@ const CartMap = () => {
       <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
         {/* Map */}
         <div style={{ flex: 2 }}>
-          <MapContainer
-            center={mapCenter}
-            zoom={12}
-            minZoom={3}
-            maxZoom={20}
-            style={{ height: '600px', width: '100%' }}
-          >
-            <ChangeMapView coords={mapCenter} />
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {filteredCarts.map((cart) => (
-              <Marker key={cart._id} position={[cart.lat, cart.lng]} icon={foodCartIcon}>
-                <Popup>
-                  <strong>{cart.name || 'Unnamed Cart'}</strong><br />
-                  <em>{cart.notes}</em><br />
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <button onClick={() => handleEdit(cart)}>✏️</button>{' '}
-                    <button onClick={() => handleDelete(cart._id)}>🗑️</button>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-            {searchResult && (
-              <Marker position={searchResult} icon={foodCartIcon}>
-                <Popup><strong>Search Result</strong><br />Click map to pin</Popup>
-              </Marker>
-            )}
-            <LocationMarker onMapClick={handleMapClick} />
-          </MapContainer>
+          <div className="inner-card" style={{ padding: 0, height: '600px' }}>
+            <MapContainer
+              center={mapCenter}
+              zoom={12}
+              minZoom={3}
+              maxZoom={20}
+              style={{ height: '100%', width: '100%' }}
+            >
+              <ChangeMapView coords={mapCenter} />
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              {filteredCarts.map((cart) => (
+                <Marker
+                  key={cart._id}
+                  position={[cart.lat, cart.lng]}
+                  icon={foodCartIcon}
+                >
+                  <Popup>
+                    <strong>{cart.name || 'Unnamed Cart'}</strong><br />
+                    <em>{cart.notes}</em><br />
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <button onClick={() => handleEdit(cart)}>✏️</button>{' '}
+                      <button onClick={() => handleDelete(cart._id)}>🗑️</button>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+              {searchResult && (
+                <Marker position={searchResult} icon={foodCartIcon}>
+                  <Popup>
+                    <strong>Search Result</strong><br />
+                    Click map to pin
+                  </Popup>
+                </Marker>
+              )}
+              <LocationMarker onMapClick={handleMapClick} />
+            </MapContainer>
+          </div>
         </div>
 
         {/* List */}
@@ -249,12 +258,14 @@ const CartMap = () => {
           overflowY: 'auto',
           boxShadow: 'var(--shadow)',
         }}>
-          <h3>📍 Pinned Carts</h3>
+          <h3>📍 Saved Carts</h3>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {filteredCarts.map((cart) => (
               <li key={cart._id} style={{ marginBottom: '1rem' }}>
-                <strong>{cart.name || 'Unnamed Cart'}</strong><br />
-                <small>{cart.notes}</small>
+                <div className="inner-card">
+                  <strong>{cart.name || 'Unnamed Cart'}</strong><br />
+                  <small>{cart.notes}</small>
+                </div>
               </li>
             ))}
           </ul>
