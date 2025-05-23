@@ -77,7 +77,30 @@ html, body {
   padding: 0 1rem;
 }
 
-/* ===== Map Container ===== */
+/* ===== Map + List Side-by-Side ===== */
+.map-list-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.map-wrapper {
+  flex: 2;
+}
+
+.list-wrapper {
+  flex: 1;
+  max-height: 600px;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== Leaflet Map ===== */
 .leaflet-container {
   width: 100% !important;
   height: 600px !important;
@@ -142,6 +165,30 @@ html, body {
   margin-top: 1rem;
 }
 
+.side-by-side {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.map-pane {
+  flex: 1;
+  height: 600px;
+}
+
+.list-pane {
+  flex: 1;
+  background: var(--card);
+  color: var(--text);
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-y: auto;
+  max-height: 600px;
+  box-shadow: var(--shadow);
+}
+
 /* ===== Animations ===== */
 @keyframes fadeIn {
   from {
@@ -155,6 +202,16 @@ html, body {
 }
 
 /* ===== Responsive Adjustments ===== */
+@media (max-width: 768px) {
+  .map-list-container {
+    flex-direction: column;
+  }
+
+  .list-wrapper {
+    max-height: none;
+  }
+}
+
 @media (max-width: 600px) {
   .app-title {
     font-size: 1.6rem;
@@ -216,4 +273,10 @@ body.dark .modal textarea {
 
 body.dark .leaflet-container {
   filter: invert(90%) hue-rotate(180deg);
+}
+
+body.dark .list-wrapper {
+  background-color: #1f1f1f;
+  color: #f0f0f0;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
 }

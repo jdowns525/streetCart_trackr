@@ -33,9 +33,7 @@ const foodCartIcon = new L.Icon({
 
 const LocationMarker = ({ onMapClick }) => {
   useMapEvents({
-    click: (e) => {
-      onMapClick(e.latlng);
-    },
+    click: (e) => onMapClick(e.latlng),
   });
   return null;
 };
@@ -56,7 +54,6 @@ const CartMap = () => {
   const [selectedCity, setSelectedCity] = useState("New York");
   const [mapCenter, setMapCenter] = useState(cities["New York"]);
   const [userCoords, setUserCoords] = useState(null);
-  const [showList, setShowList] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResult, setSearchResult] = useState(null);
 
@@ -115,7 +112,7 @@ const CartMap = () => {
         params: { q: searchQuery, format: 'json', limit: 1 }
       });
 
-      if (res.data && res.data.length > 0) {
+      if (res.data?.length > 0) {
         const { lat, lon } = res.data[0];
         const coords = [parseFloat(lat), parseFloat(lon)];
         setMapCenter(coords);
@@ -125,7 +122,6 @@ const CartMap = () => {
       }
     } catch (err) {
       alert('Search failed');
-      console.error(err);
     }
   };
 
@@ -160,118 +156,110 @@ const CartMap = () => {
 
   return (
     <>
-      <div style={{ marginBottom: '1rem', textAlign: 'left' }}>
-        <label htmlFor="city-select" style={{ marginRight: '0.5rem' }}>
-          🌎 Select a city:
-        </label>
-        <select
-          id="city-select"
-          value={selectedCity}
-          onChange={(e) => {
-            const city = e.target.value;
-            setSelectedCity(city);
-            if (city === "My Location" && userCoords) {
-              setMapCenter(userCoords);
-            } else if (cities[city]) {
-              setMapCenter(cities[city]);
-            }
-          }}
-        >
-          {[...Object.keys(cities), "My Location"].map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
+      {/* Top Controls */}
+      <div style={{ marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <label htmlFor="city-select" style={{ marginRight: '0.5rem' }}>
+            🌎 Select a city:
+          </label>
+          <select
+            id="city-select"
+            value={selectedCity}
+            onChange={(e) => {
+              const city = e.target.value;
+              setSelectedCity(city);
+              if (city === "My Location" && userCoords) {
+                setMapCenter(userCoords);
+              } else if (cities[city]) {
+                setMapCenter(cities[city]);
+              }
+            }}
+          >
+            {[...Object.keys(cities), "My Location"].map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ flex: 1, display: 'flex', gap: '0.5rem' }}>
+          <input
+            type="text"
+            placeholder="Search location..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ flex: 1 }}
+          />
+          <button onClick={handleSearch}>🔍</button>
+          <button onClick={() => {
+            navigator.geolocation.getCurrentPosition((pos) => {
+              const { latitude, longitude } = pos.coords;
+              const coords = [latitude, longitude];
+              setUserCoords(coords);
+              setMapCenter(coords);
+              setSelectedCity("My Location");
+            });
+          }}>
+            📍 My Location
+          </button>
+        </div>
       </div>
 
-      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
-        <input
-          type="text"
-          placeholder="Search location..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: '1px solid #ccc' }}
-        />
-        <button onClick={handleSearch}>🔍 Search</button>
-      </div>
-
-      <div style={{ marginBottom: '1rem' }}>
-        <button onClick={() => {
-          navigator.geolocation.getCurrentPosition((pos) => {
-            const { latitude, longitude } = pos.coords;
-            const coords = [latitude, longitude];
-            setUserCoords(coords);
-            setMapCenter(coords);
-            setSelectedCity("My Location");
-          });
-        }}>
-          📍 Use My Location
-        </button>
-      </div>
-
-      <div style={{ marginBottom: '1rem' }}>
-        <button onClick={() => setShowList(!showList)}>
-          {showList ? '🗺️ Show Map' : '📋 Show List of Pins'}
-        </button>
-      </div>
-
-      {showList && (
-        <div style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px', background: 'var(--bg)', color: 'inherit', maxHeight: '300px', overflowY: 'auto' }}>
-          <h3 style={{ marginTop: 0 }}>📍 Pinned Carts</h3>
-          <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
+      {/* Side-by-side layout */}
+      <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+        {/* Map */}
+        <div style={{ flex: 2 }}>
+          <MapContainer
+            center={mapCenter}
+            zoom={12}
+            minZoom={3}
+            maxZoom={20}
+            style={{ height: '600px', width: '100%' }}
+          >
+            <ChangeMapView coords={mapCenter} />
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             {filteredCarts.map((cart) => (
-              <li key={cart._id} style={{ marginBottom: '0.75rem' }}>
-                • {cart.name || 'Unnamed Cart'}
+              <Marker key={cart._id} position={[cart.lat, cart.lng]} icon={foodCartIcon}>
+                <Popup>
+                  <strong>{cart.name || 'Unnamed Cart'}</strong><br />
+                  <em>{cart.notes}</em><br />
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <button onClick={() => handleEdit(cart)}>✏️</button>{' '}
+                    <button onClick={() => handleDelete(cart._id)}>🗑️</button>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+            {searchResult && (
+              <Marker position={searchResult} icon={foodCartIcon}>
+                <Popup><strong>Search Result</strong><br />Click map to pin</Popup>
+              </Marker>
+            )}
+            <LocationMarker onMapClick={handleMapClick} />
+          </MapContainer>
+        </div>
+
+        {/* List */}
+        <div style={{
+          flex: 1,
+          background: 'var(--card)',
+          color: 'var(--text)',
+          padding: '1rem',
+          borderRadius: '8px',
+          maxHeight: '600px',
+          overflowY: 'auto',
+          boxShadow: 'var(--shadow)',
+        }}>
+          <h3>📍 Pinned Carts</h3>
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {filteredCarts.map((cart) => (
+              <li key={cart._id} style={{ marginBottom: '1rem' }}>
+                <strong>{cart.name || 'Unnamed Cart'}</strong><br />
+                <small>{cart.notes}</small>
               </li>
             ))}
           </ul>
         </div>
-      )}
-
-      {!showList && (
-        <MapContainer
-          center={mapCenter}
-          zoom={12}
-          minZoom={3}
-          maxZoom={20}
-          style={{ height: '600px', width: '100%' }}
-        >
-          <ChangeMapView coords={mapCenter} />
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
-          {filteredCarts.map((cart) => (
-            <Marker
-              key={cart._id}
-              position={[cart.lat, cart.lng]}
-              icon={foodCartIcon}
-            >
-              <Popup>
-                <strong>{cart.name || 'Unnamed Cart'}</strong><br />
-                <em>{cart.notes}</em><br />
-                Lat: {cart.lat.toFixed(4)}, Lng: {cart.lng.toFixed(4)}
-                <div style={{ marginTop: '0.5rem' }}>
-                  <button onClick={() => handleEdit(cart)}>✏️ Edit</button>{' '}
-                  <button onClick={() => handleDelete(cart._id)}>🗑️ Delete</button>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-
-          {searchResult && (
-            <Marker position={searchResult} icon={foodCartIcon}>
-              <Popup>
-                <div>
-                  <strong>Search Result</strong><br />
-                  Click the map to pin it.
-                </div>
-              </Popup>
-            </Marker>
-          )}
-
-          <LocationMarker onMapClick={handleMapClick} />
-        </MapContainer>
-      )}
+      </div>
 
       <CartForm
         isOpen={formOpen}
